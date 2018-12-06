@@ -1,0 +1,56 @@
+dictionaries:
+  contao_all:
+    type: memory
+    name: memory1
+  combined-content:
+    type: compound
+    name: content
+    dictionaries:
+      content: contao_all
+      application_fields:
+        type: memory
+      article_categories:
+        type: memory
+      article_details:
+        type: memory
+      article_type:
+        type: memory
+      articles:
+        type: memory
+      translations:
+        type: memory
+
+  xliff-out:
+    type: xliff
+
+jobs:
+  export-en-de:
+    type: copy
+    source: combined-content
+    target: xliff-out
+    source_language: de
+    target_language: en
+    copy-source: true
+    copy-target: if-empty
+    clean-obsolete: true
+
+  export-en-fr:
+    type: copy
+    source: combined-content
+    target: xliff-out
+    source_language: de
+    target_language: es
+    copy-source: true
+    copy-target: if-empty
+    clean-obsolete: true
+
+  export-all:
+    type: batch
+    jobs:
+      - export-en-de
+      - export-en-fr
+
+  all:
+    type: batch
+    jobs:
+      - export-all

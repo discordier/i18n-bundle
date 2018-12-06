@@ -1,0 +1,26 @@
+services:
+
+  cyberspectrum_i18n.job_definition_builders:
+    class: Symfony\Component\DependencyInjection\ServiceLocator
+    arguments:
+      - copy: '@CyberSpectrum\I18N\Configuration\DefinitionBuilder\CopyJobDefinitionBuilder'
+        batch: '@CyberSpectrum\I18N\Configuration\DefinitionBuilder\BatchJobDefinitionBuilder'
+    tags: ['container.service_locator']
+    public: true
+
+  CyberSpectrum\I18N\Configuration\DefinitionBuilder\CopyJobDefinitionBuilder:
+
+  CyberSpectrum\I18N\Configuration\DefinitionBuilder\BatchJobDefinitionBuilder:
+    arguments:
+      - '@CyberSpectrum\I18N\Configuration\DefinitionBuilder'
+
+  cyberspectrum_i18n.job_builders:
+    class: Symfony\Component\DependencyInjection\ServiceLocator
+    arguments:
+      -
+        copy: '@CyberSpectrum\I18N\JobBuilder\CopyJobBuilder'
+        batch: '@CyberSpectrum\I18N\JobBuilder\BatchJobBuilder'
+    tags: ['container.service_locator']
+
+  CyberSpectrum\I18N\JobBuilder\CopyJobBuilder:
+  CyberSpectrum\I18N\JobBuilder\BatchJobBuilder:

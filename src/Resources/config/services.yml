@@ -1,0 +1,53 @@
+imports:
+  - job_related.yml
+  - dictionary_related.yml
+
+services:
+  # Translation provider registry - populated during container build.
+  cyberspectrum_i18n.providers:
+    class: CyberSpectrum\I18N\DependencyInjection\IdProvidingServiceLocator
+    arguments:
+      - []
+    tags: ['container.service_locator']
+    public: true
+
+  CyberSpectrum\I18NBundle\Command\DebugDictionariesCommand:
+    arguments:
+      - '@cyberspectrum_i18n.providers'
+    tags:
+      - { name: console.command }
+
+  CyberSpectrum\I18NBundle\Command\DebugProvidersCommand:
+    arguments:
+      - '@cyberspectrum_i18n.providers'
+    tags:
+      - { name: console.command }
+
+  CyberSpectrum\I18NBundle\Command\ProcessCommand:
+    arguments:
+      - '@CyberSpectrum\I18NBundle\Job\JobBuilderFactory'
+    tags:
+      - { name: console.command }
+
+  CyberSpectrum\I18NBundle\Configuration\ConfigurationLoader:
+    arguments:
+      - '@file_locator'
+      - '@CyberSpectrum\I18N\Configuration\DefinitionBuilder'
+
+  CyberSpectrum\I18N\Configuration\DefinitionBuilder:
+    arguments:
+      - '@cyberspectrum_i18n.dictionary_definition_builders'
+      - '@cyberspectrum_i18n.job_definition_builders'
+
+  CyberSpectrum\I18N\Job\JobFactoryFactory:
+    arguments:
+      - '@cyberspectrum_i18n.dictionary_builders'
+      - '@cyberspectrum_i18n.job_builders'
+      - '@logger'
+    public: true
+
+  CyberSpectrum\I18NBundle\Job\JobBuilderFactory:
+    arguments:
+      - '@CyberSpectrum\I18NBundle\Configuration\ConfigurationLoader'
+      - '@CyberSpectrum\I18N\Job\JobFactoryFactory'
+    public: true

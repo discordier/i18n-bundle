@@ -1,0 +1,9 @@
+services:
+  CyberSpectrum\I18N\Memory\MemoryDictionaryProvider:
+    tags:
+      - { name: !php/const CyberSpectrum\I18NBundle\DependencyInjection\CompilerPass\CollectDictionaryProvidersPass::TAG_DICTIONARY_PROVIDER, provider: 'memory' }
+    calls:
+      - method: 'setLogger'
+        arguments: ['@logger']
+
+  CyberSpectrum\I18N\Configuration\DefinitionBuilder\MemoryDictionaryDefinitionBuilder:

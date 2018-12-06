@@ -1,0 +1,11 @@
+services:
+  CyberSpectrum\I18N\Xliff\XliffDictionaryProvider:
+    arguments:
+      - '%kernel.root_dir%/../translations'
+    calls:
+      - method: 'setLogger'
+        arguments: ['@logger']
+    tags:
+      - { name: !php/const CyberSpectrum\I18NBundle\DependencyInjection\CompilerPass\CollectDictionaryProvidersPass::TAG_DICTIONARY_PROVIDER, provider: 'xliff' }
+
+  CyberSpectrum\I18N\Xliff\XliffDictionaryDefinitionBuilder:

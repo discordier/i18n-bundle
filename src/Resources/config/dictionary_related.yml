@@ -1,0 +1,27 @@
+services:
+
+  cyberspectrum_i18n.dictionary_definition_builders:
+    class: Symfony\Component\DependencyInjection\ServiceLocator
+    arguments:
+      - compound: '@CyberSpectrum\I18N\Configuration\DefinitionBuilder\CompoundDictionaryDefinitionBuilder'
+    tags: ['container.service_locator']
+    public: true
+
+  CyberSpectrum\I18N\Configuration\DefinitionBuilder\CompoundDictionaryDefinitionBuilder:
+    arguments:
+      - '@CyberSpectrum\I18N\Configuration\DefinitionBuilder'
+
+  CyberSpectrum\I18N\DictionaryBuilder\DefaultDictionaryBuilder:
+    arguments:
+      - '@cyberspectrum_i18n.providers'
+
+  CyberSpectrum\I18N\DictionaryBuilder\CompoundDictionaryBuilder:
+
+  cyberspectrum_i18n.dictionary_builders:
+    class: Symfony\Component\DependencyInjection\ServiceLocator
+    arguments:
+      -
+        default: '@CyberSpectrum\I18N\DictionaryBuilder\DefaultDictionaryBuilder'
+        compound: '@CyberSpectrum\I18N\DictionaryBuilder\CompoundDictionaryBuilder'
+    tags: ['container.service_locator']
+    public: true

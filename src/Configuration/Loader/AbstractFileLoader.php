@@ -28,7 +28,6 @@ use Symfony\Component\Config\Exception\FileLoaderImportCircularReferenceExceptio
 use Symfony\Component\Config\Exception\FileLocatorFileNotFoundException;
 use Symfony\Component\Config\Exception\LoaderLoadException;
 use Symfony\Component\Config\FileLocatorInterface;
-use Symfony\Component\Config\Loader\LoaderResolverInterface;
 use Symfony\Component\Config\Resource\FileExistenceResource;
 use Symfony\Component\Config\Resource\GlobResource;
 use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
@@ -40,13 +39,14 @@ use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
  */
 abstract class AbstractFileLoader implements LoaderInterface
 {
+    /** @var string[] */
     protected static $loading = [];
 
+    /** @var FileLocatorInterface */
     protected $locator;
 
+    /** @var string|null */
     private $currentDir;
-
-    protected $resolver;
 
     /**
      * The configuration being loaded.
@@ -74,8 +74,8 @@ abstract class AbstractFileLoader implements LoaderInterface
         FileLocatorInterface $locator,
         DefinitionBuilder $definitionBuilder
     ) {
-        $this->configuration = $configuration;
-        $this->locator = $locator;
+        $this->configuration     = $configuration;
+        $this->locator           = $locator;
         $this->definitionBuilder = $definitionBuilder;
     }
 
@@ -91,8 +91,12 @@ abstract class AbstractFileLoader implements LoaderInterface
 
     /**
      * Sets the current directory.
+     *
+     * @param string $dir The directory to use.
+     *
+     * @return void
      */
-    public function setCurrentDir(string $dir)
+    public function setCurrentDir(string $dir): void
     {
         $this->currentDir = $dir;
     }
@@ -108,40 +112,29 @@ abstract class AbstractFileLoader implements LoaderInterface
     }
 
     /**
-     * {@inheritdoc}
-     */
-    public function getResolver()
-    {
-        return $this->resolver;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function setResolver(LoaderResolverInterface $resolver)
-    {
-        $this->resolver = $resolver;
-    }
-
-    /**
      * Imports a resource.
      *
-     * @param mixed                $resource       A Resource
-     * @param string|null          $type           The resource type or null if unknown
-     * @param bool                 $ignoreErrors   Whether to ignore import errors or not
-     * @param string|null          $sourceResource The original resource importing the new resource
-     * @param string|string[]|null $exclude        Glob patterns to exclude from the import
+     * @param mixed                $resource       A Resource.
+     * @param string|null          $type           The resource type or null if unknown.
+     * @param bool                 $ignoreErrors   Whether to ignore import errors or not.
+     * @param string|null          $sourceResource The original resource importing the new resource.
+     * @param string|string[]|null $exclude        Glob patterns to exclude from the import.
      *
      * @return mixed
      *
-     * @throws LoaderLoadException
-     * @throws FileLoaderImportCircularReferenceException
-     * @throws FileLocatorFileNotFoundException
+     * @throws LoaderLoadException                        If no loader is found or anything else that went wrong.
+     * @throws FileLoaderImportCircularReferenceException When a circular import chain has been found.
+     * @throws FileLocatorFileNotFoundException           When the resource could not be found.
      *
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      */
-    public function import($resource, string $type = null, bool $ignoreErrors = false, string $sourceResource = null, $exclude = null): void
-    {
+    public function import(
+        $resource,
+        string $type = null,
+        bool $ignoreErrors = false,
+        string $sourceResource = null,
+        $exclude = null
+    ): void {
         if (\is_string($resource) && \strlen($resource) !== $length = strcspn($resource, '*?{[')) {
             $excluded = [];
             foreach ((array) $exclude as $pattern) {
@@ -152,7 +145,14 @@ abstract class AbstractFileLoader implements LoaderInterface
             }
 
             $isSubPath = 0 !== $length && false !== strpos(substr($resource, 0, $length), '/');
-            foreach ($this->glob($resource, false, $resources, $ignoreErrors || !$isSubPath, false, $excluded) as $path => $info) {
+            foreach ($this->glob(
+                $resource,
+                false,
+                $resources,
+                $ignoreErrors || !$isSubPath,
+                false,
+                $excluded
+            ) as $path => $info) {
                 $this->doImport($path, 'glob' === $type ? null : $type, $ignoreErrors, $sourceResource);
                 $isSubPath = true;
             }
@@ -166,31 +166,19 @@ abstract class AbstractFileLoader implements LoaderInterface
     }
 
     /**
-     * Finds a loader able to load an imported resource.
+     * Glob for the resource.
      *
-     * @param mixed       $resource A resource
-     * @param string|null $type     The resource type or null if unknown
+     * @param string $pattern      The glob pattern to search for.
+     * @param bool   $recursive    Flag whether directories should be scanned recursively or not.
+     * @param mixed  $resource     The resources found.
+     * @param bool   $ignoreErrors Flag whether errors should get ignored.
+     * @param bool   $forExclusion Flag if the resources should get collected for exclusion.
+     * @param array  $excluded     List of prefixes to exclude.
      *
-     * @return $this|\Symfony\Component\Config\Loader\LoaderInterface
+     * @return \Generator
      *
-     * @throws LoaderLoadException If no loader is found
-     */
-    public function resolve($resource, string $type = null)
-    {
-        if ($this->supports($resource, $type)) {
-            return $this;
-        }
-
-        $loader = null === $this->resolver ? false : $this->resolver->resolve($resource, $type);
-
-        if (false === $loader) {
-            throw new LoaderLoadException($resource, null, null, null, $type);
-        }
-
-        return $loader;
-    }
-
-    /**
+     * @throws FileLocatorFileNotFoundException When the resource could not be found.
+     *
      * @internal
      */
     protected function glob(
@@ -200,15 +188,15 @@ abstract class AbstractFileLoader implements LoaderInterface
         bool $ignoreErrors = false,
         bool $forExclusion = false,
         array $excluded = []
-    ) {
+    ): \Generator {
         if (\strlen($pattern) === $index = strcspn($pattern, '*?{[')) {
-            $prefix = $pattern;
+            $prefix  = $pattern;
             $pattern = '';
         } elseif (0 === $index || false === strpos(substr($pattern, 0, $index), '/')) {
-            $prefix = '.';
+            $prefix  = '.';
             $pattern = '/'.$pattern;
         } else {
-            $prefix = \dirname(substr($pattern, 0, 1 + $index));
+            $prefix  = \dirname(substr($pattern, 0, (1 + $index)));
             $pattern = substr($pattern, \strlen($prefix));
         }
 
@@ -223,8 +211,9 @@ abstract class AbstractFileLoader implements LoaderInterface
             foreach ($e->getPaths() as $path) {
                 $resource[] = new FileExistenceResource($path);
             }
-
+            // @codingStandardsIgnoreStart - does not understand the generator
             return;
+            // @codingStandardsIgnoreEnd
         }
         $resource = new GlobResource($prefix, $pattern, $recursive, $forExclusion, $excluded);
 
@@ -277,20 +266,38 @@ abstract class AbstractFileLoader implements LoaderInterface
         }
     }
 
-/**  @SuppressWarnings(PHPMD.CyclomaticComplexity) */
-    private function doImport($resource, string $type = null, bool $ignoreErrors = false, string $sourceResource = null): void
-    {
+    /**
+     * Import a resource.
+     *
+     * @param mixed       $resource       The resource to import.
+     * @param string|null $type           The type of the resource.
+     * @param bool        $ignoreErrors   Flag if errors shall be ignored.
+     * @param string|null $sourceResource The source resource importing the resource.
+     *
+     * @return void
+     *
+     * @throws FileLoaderImportCircularReferenceException When a circular import chain has been found.
+     * @throws LoaderLoadException                        For anything else that goes wrong.
+     * @throws \Exception                                 Get's converted to LoaderLoadException.
+     *
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     */
+    private function doImport(
+        $resource,
+        string $type = null,
+        bool $ignoreErrors = false,
+        string $sourceResource = null
+    ): void {
         try {
-            $loader = $this->resolve($resource, $type);
-
-            if ($loader instanceof self && null !== $this->currentDir) {
-                $resource = $loader->getLocator()->locate($resource, $this->currentDir, false);
+            if (null !== $this->currentDir) {
+                $resource = $this->getLocator()->locate($resource, $this->currentDir, false);
             }
 
-            $resources = \is_array($resource) ? $resource : [$resource];
-            for ($i = 0; $i < $resourcesCount = \count($resources); ++$i) {
+            $resources      = \is_array($resource) ? $resource : [$resource];
+            $resourcesCount = \count($resources);
+            for ($i = 0; $i < $resourcesCount; ++$i) {
                 if (isset(self::$loading[$resources[$i]])) {
-                    if ($i == $resourcesCount - 1) {
+                    if ($i == ($resourcesCount - 1)) {
                         throw new FileLoaderImportCircularReferenceException(array_keys(self::$loading));
                     }
                 } else {
@@ -301,7 +308,7 @@ abstract class AbstractFileLoader implements LoaderInterface
             self::$loading[$resource] = true;
 
             try {
-                $loader->load($resource, $type);
+                $this->load($resource, $type);
             } finally {
                 unset(self::$loading[$resource]);
             }

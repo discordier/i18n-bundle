@@ -1,0 +1,6 @@
+imports:
+  - import-child.yaml
+
+dictionaries:
+  xliff-in:
+    type: xliff

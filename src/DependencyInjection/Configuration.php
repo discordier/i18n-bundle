@@ -34,9 +34,10 @@ class Configuration implements ConfigurationInterface
      */
     public function getConfigTreeBuilder(): TreeBuilder
     {
-        $treeBuilder = new TreeBuilder();
-
-        $rootNode = $treeBuilder->root('cyberspectrum_i18n');
+        $treeBuilder = new TreeBuilder('cyberspectrum_i18n');
+        $rootNode    = method_exists(TreeBuilder::class, 'getRootNode')
+            ? $treeBuilder->getRootNode()
+            : $treeBuilder->root('cyberspectrum_i18n');
         $rootNode
             ->children()
                 ->booleanNode('enable_xliff')

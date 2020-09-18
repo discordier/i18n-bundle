@@ -21,15 +21,15 @@
     "source": "https://github.com/cyberspectrum/i18n-bundle"
   },
   "require": {
-    "php": "^7.1.3",
+    "php": "^7.2",
     "cyberspectrum/i18n": "^1.0.0@dev",
-    "symfony/config": "^3.4 | 4.1",
-    "symfony/dependency-injection": "^3.4 | 4.1",
-    "symfony/http-kernel": "^3.4 | 4.1"
+    "symfony/config": "^3.4 | ^4.1",
+    "symfony/dependency-injection": "^3.4 | ^4.1 | ^5.0",
+    "symfony/http-kernel": "^3.4 | ^4.1 | ^5.0"
   },
   "require-dev": {
     "cyberspectrum/i18n-xliff": "^1.0.0@dev",
-    "phpcq/all-tasks": "^1.2"
+    "phpcq/all-tasks": "^1.3"
   },
   "suggest": {
     "cyberspectrum/i18n-contao": "For Contao content support",

@@ -86,5 +86,7 @@ class ProcessCommand extends Command
                 : $jobBuilder->getJobNames()));
 
         $batchJob->run($dryRun);
+
+        return 0;
     }
 }

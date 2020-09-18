@@ -70,5 +70,7 @@ class DebugProvidersCommand extends Command
         foreach ($this->providers->ids() as $providerName) {
             $output->writeln($providerName);
         }
+
+        return 0;
     }
 }

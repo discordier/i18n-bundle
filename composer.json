@@ -31,7 +31,7 @@
     "symfony/yaml": "^3.4 || ^4.2 || ^5.0 || ^6.0"
   },
   "require-dev": {
-    "cyberspectrum/i18n-xliff": "^1.0.0@dev",
+    "cyberspectrum/i18n-xliff": "dev-fix/phpcq-2 as 1.0.0@dev",
     "phpcq/runner-bootstrap": "^1.0@dev"
   },
   "suggest": {

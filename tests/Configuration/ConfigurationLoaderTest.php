@@ -1,23 +1,6 @@
 <?php
 
-/**
- * This file is part of cyberspectrum/i18n-bundle.
- *
- * (c) 2018 CyberSpectrum.
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- *
- * This project is provided in good faith and hope to be usable by anyone.
- *
- * @package    cyberspectrum/i18n-bundle
- * @author     Christian Schiffler <c.schiffler@cyberspectrum.de>
- * @copyright  2018 CyberSpectrum.
- * @license    https://github.com/cyberspectrum/i18n-bundle/blob/master/LICENSE MIT
- * @filesource
- */
-
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace CyberSpectrum\I18NBundle\Test\Configuration;
 
@@ -33,12 +16,10 @@ use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ServiceLocator;
 
 /**
- * This tests the configuration factory.
- *
  * @covers \CyberSpectrum\I18NBundle\Configuration\ConfigurationLoader
  * @covers \CyberSpectrum\I18NBundle\Configuration\Loader\YamlLoader
  */
-class ConfigurationLoaderTest extends TestCase
+final class ConfigurationLoaderTest extends TestCase
 {
     /**
      * Data provider for configuration files.
@@ -77,11 +58,6 @@ class ConfigurationLoaderTest extends TestCase
     /**
      * Test loading.
      *
-     * @param array  $expected
-     * @param string $fixture
-     *
-     * @return void
-     *
      * @dataProvider configProvider
      */
     public function testLoad(array $expected, string $fixture): void
@@ -112,15 +88,10 @@ class ConfigurationLoaderTest extends TestCase
         $factory = new ConfigurationLoader($locator, $definitionBuilder);
         $config = $factory->load($fixture);
 
-        $this->assertSame($expected['jobNames'], $config->getJobNames());
-        $this->assertSame($expected['dictionaries'], $config->getDictionaryNames());
+        self::assertSame($expected['jobNames'], $config->getJobNames());
+        self::assertSame($expected['dictionaries'], $config->getDictionaryNames());
     }
 
-    /**
-     * Test loading.
-     *
-     * @return void
-     */
     public function testUnsupportedFileThrows(): void
     {
         $locator = new FileLocator($fixture = __DIR__ . '/Fixtures/empty.xml');
@@ -135,11 +106,6 @@ class ConfigurationLoaderTest extends TestCase
         $factory->load($fixture);
     }
 
-    /**
-     * Test loading.
-     *
-     * @return void
-     */
     public function testEmptyFileThrows(): void
     {
         $locator = new FileLocator($fixture = __DIR__ . '/Fixtures/empty.yml');

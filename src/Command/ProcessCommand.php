@@ -1,23 +1,6 @@
 <?php
 
-/**
- * This file is part of cyberspectrum/i18n-bundle.
- *
- * (c) 2018 CyberSpectrum.
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- *
- * This project is provided in good faith and hope to be usable by anyone.
- *
- * @package    cyberspectrum/i18n-bundle
- * @author     Christian Schiffler <c.schiffler@cyberspectrum.de>
- * @copyright  2018 CyberSpectrum.
- * @license    https://github.com/cyberspectrum/i18n-bundle/blob/master/LICENSE MIT
- * @filesource
- */
-
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace CyberSpectrum\I18NBundle\Command;
 
@@ -32,18 +15,12 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * This class provides a command to process jobs.
  */
-class ProcessCommand extends Command
+final class ProcessCommand extends Command
 {
-    /**
-     * The job builder factory.
-     *
-     * @var JobBuilderFactory
-     */
-    private $jobBuilderFactory;
+    /** The job builder factory. */
+    private JobBuilderFactory $jobBuilderFactory;
 
     /**
-     * Create a new instance.
-     *
      * @param JobBuilderFactory $jobBuilderFactory The job builder factory.
      */
     public function __construct(JobBuilderFactory $jobBuilderFactory)
@@ -52,9 +29,6 @@ class ProcessCommand extends Command
         $this->jobBuilderFactory = $jobBuilderFactory;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     protected function configure(): void
     {
         parent::configure();
@@ -72,18 +46,19 @@ class ProcessCommand extends Command
 
     /**
      * {@inheritDoc}
-     *
-     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $dryRun     = $input->getOption('dry-run');
-        $jobBuilder = $this->jobBuilderFactory->create($input->getOption('job-config'));
-        $batchJob   = new BatchJob(array_map(function (string $jobName) use ($jobBuilder) {
-            return $jobBuilder->createJobByName($jobName);
-        }, ($jobNames = $input->getArgument('jobs'))
-                ? $jobNames
-                : $jobBuilder->getJobNames()));
+        /** @var list<string>|null $jobNames */
+        $jobNames   = $input->getArgument('jobs') ?: null;
+        $dryRun     = (bool) $input->getOption('dry-run');
+        $jobBuilder = $this->jobBuilderFactory->create((string) $input->getOption('job-config'));
+
+        $jobs = [];
+        foreach ($jobNames ?? $jobBuilder->getJobNames() as $jobName) {
+            $jobs[$jobName] = $jobBuilder->createJobByName($jobName);
+        }
+        $batchJob = new BatchJob($jobs);
 
         $batchJob->run($dryRun);
 

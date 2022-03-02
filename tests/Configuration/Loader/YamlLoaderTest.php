@@ -1,23 +1,6 @@
 <?php
 
-/**
- * This file is part of cyberspectrum/i18n-bundle.
- *
- * (c) 2018 CyberSpectrum.
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- *
- * This project is provided in good faith and hope to be usable by anyone.
- *
- * @package    cyberspectrum/i18n-bundle
- * @author     Christian Schiffler <c.schiffler@cyberspectrum.de>
- * @copyright  2020 CyberSpectrum.
- * @license    https://github.com/cyberspectrum/i18n-bundle/blob/master/LICENSE MIT
- * @filesource
- */
-
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace CyberSpectrum\I18NBundle\Test\Configuration\Loader;
 
@@ -29,18 +12,9 @@ use PHPUnit\Framework\TestCase;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Config\FileLocatorInterface;
 
-/**
- * This tests the configuration loader.
- *
- * @covers \CyberSpectrum\I18NBundle\Configuration\Loader\AbstractFileLoader
- */
-class YamlLoaderTest extends TestCase
+/** @covers \CyberSpectrum\I18NBundle\Configuration\Loader\AbstractFileLoader */
+final class YamlLoaderTest extends TestCase
 {
-    /**
-     * Test the abstract file loader.
-     *
-     * @return void
-     */
     public function testLoading(): void
     {
         $config = new Configuration();
@@ -61,6 +35,6 @@ class YamlLoaderTest extends TestCase
         $loader = new YamlLoader($config, new FileLocator([__DIR__ . '/../Fixtures']), $definitionBuilder);
         $loader->load('import-parent.yaml');
 
-        $this->assertSame($config, $loader->getConfiguration());
+        self::assertSame($config, $loader->getConfiguration());
     }
 }

@@ -1,4 +1,4 @@
-name: cyberspectrum/i18n
+name: cyberspectrum/i18n-bundle
 
 on:
   push:
@@ -15,20 +15,24 @@ jobs:
       matrix:
         include:
           - php: '7.4'
-            output: '-o github-action -o default'
             phpcq_install: 'install'
+            phpcq_flags: ''
             composer_install: 'update --prefer-lowest'
           - php: '7.4'
-            output: '-o github-action -o default'
             phpcq_install: 'update'
+            phpcq_flags: ''
             composer_install: 'update'
           - php: '8.0'
-            output: '-o github-action -o default'
             phpcq_install: 'update'
+            phpcq_flags: ''
             composer_install: 'update'
           - php: '8.1'
-            output: '-o github-action -o default'
             phpcq_install: 'update'
+            phpcq_flags: ''
+            composer_install: 'update'
+          - php: '8.2'
+            phpcq_install: 'update'
+            phpcq_flags: '--exit-0'
             composer_install: 'update'
 
     steps:
@@ -65,13 +69,13 @@ jobs:
         run: composer ${{ matrix.composer_install }} --prefer-stable --no-interaction --no-progress
 
       - name: PHP ${{ matrix.php }} Update phpcq
-        run: ./vendor/bin/phpcq self-update
+        run: ./vendor/bin/phpcq self-update --unsigned
 
       - name: PHP ${{ matrix.php }} Install phpcq toolchain
         run: ./vendor/bin/phpcq ${{ matrix.phpcq_install }} -v
 
       - name: PHP ${{ matrix.php }} Run tests
-        run: ./vendor/bin/phpcq run -v ${{ matrix.output }}
+        run: ./vendor/bin/phpcq run -v -o github-action -o default ${{ matrix.phpcq_flags }}
 
       - name: PHP ${{ matrix.php }} Upload build directory to artifact
         uses: actions/upload-artifact@v2

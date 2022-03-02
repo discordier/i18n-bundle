@@ -49,10 +49,12 @@ final class ProcessCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        $configFile = $input->getOption('job-config');
+        assert(is_string($configFile));
         /** @var list<string>|null $jobNames */
         $jobNames   = $input->getArgument('jobs') ?: null;
         $dryRun     = (bool) $input->getOption('dry-run');
-        $jobBuilder = $this->jobBuilderFactory->create((string) $input->getOption('job-config'));
+        $jobBuilder = $this->jobBuilderFactory->create($configFile);
 
         $jobs = [];
         foreach ($jobNames ?? $jobBuilder->getJobNames() as $jobName) {

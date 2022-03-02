@@ -24,11 +24,11 @@
     "php": "^7.4 || ^8.0",
     "cyberspectrum/i18n": "dev-fix/phpcq-2 as 1.0.0@dev",
     "psr/log": "^1.1.4 || ^2.0 || ^3.0",
-    "symfony/config": "^3.4 || ^4.2 || ^5.0 || ^6.0",
-    "symfony/console": "^3.4 || ^4.2 || ^5.0 || ^6.0",
-    "symfony/dependency-injection": "^3.4 || ^4.2 || ^5.0 || ^6.0",
-    "symfony/http-kernel": "^3.4 || ^4.2 || ^5.0 || ^6.0",
-    "symfony/yaml": "^3.4 || ^4.2 || ^5.0 || ^6.0"
+    "symfony/config": "^4.4 || ^5.4 || ^6.0",
+    "symfony/console": "^4.4 || ^5.4 || ^6.0",
+    "symfony/dependency-injection": "^4.4 || ^5.4 || ^6.0",
+    "symfony/http-kernel": "^4.4 || ^5.4 || ^6.0",
+    "symfony/yaml": "^4.4 || ^5.4 || ^6.0"
   },
   "require-dev": {
     "cyberspectrum/i18n-xliff": "dev-fix/phpcq-2 as 1.0.0@dev",

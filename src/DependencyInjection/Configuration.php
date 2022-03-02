@@ -12,14 +12,14 @@ final class Configuration implements ConfigurationInterface
 {
     /**
      * {@inheritDoc}
+     *
+     * @psalm-suppress MixedMethodCall
      */
     public function getConfigTreeBuilder(): TreeBuilder
     {
         $treeBuilder = new TreeBuilder('cyberspectrum_i18n');
-        /** @psalm-suppress MixedAssignment */
-        $rootNode    = method_exists(TreeBuilder::class, 'getRootNode')
-            ? $treeBuilder->getRootNode()
-            : $treeBuilder->root('cyberspectrum_i18n');
+        $rootNode = $treeBuilder->getRootNode();
+        /** @psalm-suppress PossiblyUndefinedMethod */
         $rootNode
             ->children()
                 ->booleanNode('enable_xliff')

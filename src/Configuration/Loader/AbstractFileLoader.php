@@ -20,6 +20,7 @@ use Symfony\Component\Config\Resource\FileExistenceResource;
 use Symfony\Component\Config\Resource\GlobResource;
 use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 use Throwable;
+use Traversable;
 
 use function count;
 use function dirname;
@@ -204,7 +205,10 @@ abstract class AbstractFileLoader implements LoaderInterface
         assert(is_string($prefix));
         $resource = new GlobResource($prefix, $pattern, $recursive, $forExclusion, $excluded);
 
-        yield from $resource;
+        /** @var Traversable<string, SplFileInfo> $iterator */
+        $iterator = $resource->getIterator();
+
+        yield from $iterator;
     }
 
     /**

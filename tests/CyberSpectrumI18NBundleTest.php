@@ -25,8 +25,10 @@ final class CyberSpectrumI18NBundleTest extends TestCase
         $container
             ->expects($this->once())
             ->method('addCompilerPass')
-            ->willReturnCallback(function () use (&$arguments) {
+            ->willReturnCallback(function () use (&$arguments, $container): ContainerBuilder {
                 $arguments[] = func_get_args();
+
+                return $container;
             });
 
         $bundle = new CyberSpectrumI18NBundle();

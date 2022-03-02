@@ -314,7 +314,7 @@ abstract class AbstractFileLoader implements LoaderInterface
                     throw $e;
                 }
 
-                throw new LoaderLoadException(var_export($resource, true), $sourceResource, null, $e, $type);
+                throw new LoaderLoadException(var_export($resource, true), $sourceResource, 0, $e, $type);
             }
         }
     }

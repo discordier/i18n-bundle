@@ -122,6 +122,7 @@ abstract class AbstractFileLoader implements LoaderInterface
         if (is_string($resource) && strlen($resource) !== $length = strcspn($resource, '*?{[')) {
             $excluded = [];
             foreach ((array) $exclude as $pattern) {
+                /** @psalm-suppress InvalidIterator - Psalm thinks a Generator is not iterable, why? */
                 foreach ($this->glob($pattern, true, $resources, false, true) as $path => $_ignored) {
                     // normalize Windows slashes
                     $excluded[str_replace('\\', '/', $path)] = true;
@@ -129,6 +130,7 @@ abstract class AbstractFileLoader implements LoaderInterface
             }
 
             $isSubPath = 0 !== $length && str_contains(substr($resource, 0, $length), '/');
+            /** @psalm-suppress InvalidIterator - Psalm thinks a Generator is not iterable, why? */
             foreach (
                 $this->glob(
                     $resource,

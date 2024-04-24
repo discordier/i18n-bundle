@@ -46,6 +46,10 @@ final class YamlLoader extends AbstractFileLoader
         if (!is_string($resource)) {
             throw new InvalidArgumentException('Resource is not a string');
         }
+        /**
+         * @psalm-suppress UnnecessaryVarAnnotation - Needed for symfony 5 annotations.
+         * @var string $path
+         */
         $path = $this->locator->locate($resource);
         $content = $this->loadFile($path);
 

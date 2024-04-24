@@ -204,6 +204,10 @@ abstract class AbstractFileLoader implements LoaderInterface
             return;
         }
 
+        /**
+         * @psalm-suppress UnnecessaryVarAnnotation - Needed for symfony 5 annotations.
+         * @var string $prefix
+         */
         $resource = new GlobResource($prefix, $pattern, $recursive, $forExclusion, $excluded);
 
         foreach ($resource->getIterator() as $filename => $fileInfo) {

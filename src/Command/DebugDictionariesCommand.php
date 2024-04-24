@@ -1,23 +1,6 @@
 <?php
 
-/**
- * This file is part of cyberspectrum/i18n-bundle.
- *
- * (c) 2018 CyberSpectrum.
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- *
- * This project is provided in good faith and hope to be usable by anyone.
- *
- * @package    cyberspectrum/i18n-bundle
- * @author     Christian Schiffler <c.schiffler@cyberspectrum.de>
- * @copyright  2018 CyberSpectrum.
- * @license    https://github.com/cyberspectrum/i18n-bundle/blob/master/LICENSE MIT
- * @filesource
- */
-
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace CyberSpectrum\I18NBundle\Command;
 
@@ -33,22 +16,19 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
+use function array_key_last;
+use function assert;
+
 /**
  * This class provides a command to list the dictionaries.
  */
-class DebugDictionariesCommand extends Command
+final class DebugDictionariesCommand extends Command
 {
-    /**
-     * The dictionary providers.
-     *
-     * @var IdProvidingServiceLocator
-     */
-    private $providers;
+    /** The dictionary providers. */
+    private IdProvidingServiceLocator $providers;
 
     /**
-     * Create a new instance.
-     *
-     * @param \CyberSpectrum\I18N\DependencyInjection\IdProvidingServiceLocator $providers The dictionary locator.
+     * @param IdProvidingServiceLocator $providers The dictionary locator.
      */
     public function __construct(IdProvidingServiceLocator $providers)
     {
@@ -72,24 +52,23 @@ class DebugDictionariesCommand extends Command
 
     /**
      * {@inheritDoc}
-     *
-     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        /** @var string|null $filterProvider */
         $filterProvider = $input->getArgument('provider');
+        /** @var string|null $sourceLanguage */
         $sourceLanguage = $input->getOption('source-language');
+        /** @var string|null $targetLanguage */
         $targetLanguage = $input->getOption('target-language');
 
         $list  = $this->getDictionaryList($filterProvider, $sourceLanguage, $targetLanguage);
-        $keys  = \array_keys($list);
-        $last  = $keys[(count($keys) - 1)];
+        $last  = array_key_last($list);
         $table = new Table($output);
         foreach ($list as $providerName => $dictionaries) {
             $table->addRow([new TableCell($providerName, array('colspan' => 3))]);
             $table->addRow(new TableSeparator());
             foreach ($dictionaries as $information) {
-                /** @var DictionaryInformation $information */
                 $table->addRow(
                     [$information->getName(), $information->getSourceLanguage(), $information->getTargetLanguage()]
                 );
@@ -111,18 +90,21 @@ class DebugDictionariesCommand extends Command
      * @param string|null $sourceLanguage The source language to filter, if any.
      * @param string|null $targetLanguage The target language to filter, if any.
      *
-     * @return array
+     * @return array<string, list<DictionaryInformation>>
      */
-    protected function getDictionaryList($filterProvider, $sourceLanguage, $targetLanguage): array
-    {
+    protected function getDictionaryList(
+        ?string $filterProvider,
+        ?string $sourceLanguage,
+        ?string $targetLanguage
+    ): array {
         $list = [];
         foreach ($this->providers->ids() as $providerName) {
             $dictionaries = [];
-            if ($filterProvider && ($filterProvider !== $providerName)) {
+            if ('' !== ($filterProvider ?? '') && ($filterProvider !== $providerName)) {
                 continue;
             }
-            /** @var DictionaryProviderInterface $provider */
             $provider = $this->providers->get($providerName);
+            assert($provider instanceof DictionaryProviderInterface);
             foreach ($provider->getAvailableDictionaries() as $information) {
                 if (!$this->allowedLanguage($information->getSourceLanguage(), $sourceLanguage)) {
                     continue;
@@ -148,11 +130,9 @@ class DebugDictionariesCommand extends Command
      *
      * @param string      $language The language to check.
      * @param string|null $filter   The optional filter.
-     *
-     * @return bool
      */
-    private function allowedLanguage(string $language, string $filter = null): bool
+    private function allowedLanguage(string $language, ?string $filter): bool
     {
-        return !$filter || ($language === $filter);
+        return (null === $filter) || ($language === $filter);
     }
 }

@@ -1,0 +1,9 @@
+{
+  "symbol-whitelist" : [
+    "null", "true", "false",
+    "self", "parent",
+    "array", "string", "int", "float", "bool", "iterable", "callable", "void", "object",
+    "CyberSpectrum\\I18N\\Xliff\\XliffDictionaryDefinitionBuilder",
+    "CyberSpectrum\\I18N\\Xliff\\XliffDictionaryProvider"
+  ]
+}

@@ -1,34 +1,18 @@
 <?php
 
-/**
- * This file is part of cyberspectrum/i18n-bundle.
- *
- * (c) 2018 CyberSpectrum.
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- *
- * This project is provided in good faith and hope to be usable by anyone.
- *
- * @package    cyberspectrum/i18n-bundle
- * @author     Christian Schiffler <c.schiffler@cyberspectrum.de>
- * @copyright  2018 CyberSpectrum.
- * @license    https://github.com/cyberspectrum/i18n-bundle/blob/master/LICENSE MIT
- * @filesource
- */
-
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace CyberSpectrum\I18NBundle\DependencyInjection\CompilerPass;
 
+use RuntimeException;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
 
-/**
- * This pass adds tagged services to the various factories.
- */
-class CollectDictionaryProvidersPass implements CompilerPassInterface
+use function count;
+
+/** This pass adds tagged services to the various factories. */
+final class CollectDictionaryProvidersPass implements CompilerPassInterface
 {
     /**
      * The tag name to use for attribute factories.
@@ -40,36 +24,36 @@ class CollectDictionaryProvidersPass implements CompilerPassInterface
      *
      * @param ContainerBuilder $container The container builder.
      *
-     * @return void
-     *
-     * @throws \RuntimeException When a tag has no provider name or multiple services have been registered.
+     * @throws RuntimeException When a tag has no provider name or multiple services have been registered.
      */
     public function process(ContainerBuilder $container): void
     {
         if ([] === $services = $container->findTaggedServiceIds(self::TAG_DICTIONARY_PROVIDER)) {
             return;
         }
+        /** @var array<string, list<array{provider?: ?string}>> $services */
 
         $providerRegistry = $container->getDefinition('cyberspectrum_i18n.providers');
-        $arguments        = $providerRegistry->getArguments();
-        if (0 === \count($arguments)) {
-            $arguments[] = [];
+        /** @var array{0?: array<string, Reference>} $arguments */
+        $arguments = $providerRegistry->getArguments();
+        if (!isset($arguments[0])) {
+            $arguments[0] = [];
         }
         foreach ($services as $serviceId => $tags) {
             foreach ($tags as $tag) {
                 if (!array_key_exists('provider', $tag)) {
-                    throw new \RuntimeException(sprintf(
+                    throw new RuntimeException(sprintf(
                         'Tag "%1$s" for service "%2$s" has no provider key.',
                         self::TAG_DICTIONARY_PROVIDER,
                         $serviceId
                     ));
                 }
                 if (null === $providerName = $tag['provider']) {
-                    $providerName = $this->getProviderAlias($container->getDefinition($serviceId)->getClass());
+                    $providerName = $this->getProviderAlias((string) $container->getDefinition($serviceId)->getClass());
                 }
 
                 if (isset($arguments[0][$providerName])) {
-                    throw new \RuntimeException('Multiple dictionary providers with name "' . $providerName . '".');
+                    throw new RuntimeException('Multiple dictionary providers with name "' . $providerName . '".');
                 }
                 $arguments[0][$providerName] = new Reference($serviceId);
             }
@@ -96,12 +80,12 @@ class CollectDictionaryProvidersPass implements CompilerPassInterface
      *
      * @return string The alias
      *
-     * @throws \RuntimeException When the provider class name does not follow conventions.
+     * @throws RuntimeException When the provider class name does not follow conventions.
      */
     public function getProviderAlias(string $className): string
     {
         if ('DictionaryProvider' !== substr($className, -18)) {
-            throw new \RuntimeException(
+            throw new RuntimeException(
                 'DictionaryProvider "' . $className .
                 '" does not follow the naming convention; can not configure automatically.'
             );

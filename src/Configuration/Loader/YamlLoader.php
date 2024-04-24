@@ -47,9 +47,6 @@ final class YamlLoader extends AbstractFileLoader
             throw new InvalidArgumentException('Resource is not a string');
         }
         $path = $this->locator->locate($resource);
-        if (!is_string($path)) {
-            throw new InvalidArgumentException('Multiple files found');
-        }
         $content = $this->loadFile($path);
 
         $this->checkArrayStructure($content, $resource);
@@ -133,13 +130,16 @@ final class YamlLoader extends AbstractFileLoader
             $this->yamlParser = new Parser();
         }
 
+        /**
+         * @psalm-suppress MixedArgument - somehow psalm fails to detect that the callable signature is correct.
+         * @psalm-suppress UndefinedVariable - psalm also fails to see the variable declaration on this very line.
+         */
         $prevErrorHandler = set_error_handler(
             function (
                 int $level,
                 string $message,
-                ?string $script,
-                ?int $line,
-                ?array $context
+                string $script = 'unknown',
+                int $line = 0
             ) use (
                 $file,
                 &$prevErrorHandler
@@ -148,7 +148,7 @@ final class YamlLoader extends AbstractFileLoader
                     ? preg_replace('/ on line \d+/', ' in "' . $file . '"$0', $message)
                     : $message;
                 if (is_callable($prevErrorHandler)) {
-                    return (bool) $prevErrorHandler($level, $message, $script, $line, $context);
+                    return (bool) $prevErrorHandler($level, $message, $script, $line);
                 }
 
                 return false;
@@ -204,7 +204,7 @@ final class YamlLoader extends AbstractFileLoader
             throw new InvalidArgumentException(sprintf('Unknown configuration key "%s".', $namespace));
         }
 
-        if ($imports = $content['imports'] ?? null) {
+        if (null !== ($imports = $content['imports'] ?? null)) {
             if (!is_array($imports)) {
                 throw $this->buildException('The "imports" key must contain an array', $file);
             }

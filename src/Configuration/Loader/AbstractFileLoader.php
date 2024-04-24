@@ -20,15 +20,14 @@ use Symfony\Component\Config\Resource\FileExistenceResource;
 use Symfony\Component\Config\Resource\GlobResource;
 use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 use Throwable;
-use Traversable;
 
 use function count;
 use function dirname;
 use function is_array;
 use function is_string;
+use function str_contains;
 use function strcspn;
 use function strlen;
-use function strpos;
 use function substr;
 
 /**
@@ -105,7 +104,7 @@ abstract class AbstractFileLoader implements LoaderInterface
      * @param string|null          $sourceResource The original resource importing the new resource.
      * @param string|string[]|null $exclude        Glob patterns to exclude from the import.
      *
-     * @return mixed
+     * @return void
      *
      * @throws LoaderLoadException                        If no loader is found or anything else that went wrong.
      * @throws FileLoaderImportCircularReferenceException When a circular import chain has been found.
@@ -129,7 +128,7 @@ abstract class AbstractFileLoader implements LoaderInterface
                 }
             }
 
-            $isSubPath = 0 !== $length && false !== strpos(substr($resource, 0, $length), '/');
+            $isSubPath = 0 !== $length && str_contains(substr($resource, 0, $length), '/');
             foreach (
                 $this->glob(
                     $resource,
@@ -162,7 +161,7 @@ abstract class AbstractFileLoader implements LoaderInterface
      * @param bool   $forExclusion Flag if the resources should get collected for exclusion.
      * @param array  $excluded     List of prefixes to exclude.
      *
-     * @return Generator<string, SplFileInfo, void, void>
+     * @return Generator<string, SplFileInfo, void, null>
      *
      * @throws FileLocatorFileNotFoundException When the resource could not be found.
      *
@@ -179,7 +178,7 @@ abstract class AbstractFileLoader implements LoaderInterface
         if (strlen($pattern) === $index = strcspn($pattern, '*?{[')) {
             $prefix  = $pattern;
             $pattern = '';
-        } elseif (0 === $index || false === strpos(substr($pattern, 0, $index), '/')) {
+        } elseif (0 === $index || !str_contains(substr($pattern, 0, $index), '/')) {
             $prefix  = '.';
             $pattern = '/' . $pattern;
         } else {
@@ -202,13 +201,12 @@ abstract class AbstractFileLoader implements LoaderInterface
             }
             return;
         }
-        assert(is_string($prefix));
+
         $resource = new GlobResource($prefix, $pattern, $recursive, $forExclusion, $excluded);
 
-        /** @var Traversable<string, SplFileInfo> $iterator */
-        $iterator = $resource->getIterator();
-
-        yield from $iterator;
+        foreach ($resource->getIterator() as $filename => $fileInfo) {
+            yield $filename => $fileInfo;
+        }
     }
 
     /**
@@ -319,14 +317,13 @@ abstract class AbstractFileLoader implements LoaderInterface
         }
     }
 
-
     /**
      * @psalm-assert TContentsArray $content
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      */
     private function checkArrayStructure(array $content, string $file): void
     {
-        if ($dictionaries = $content['dictionaries'] ?? null) {
+        if (null !== ($dictionaries = $content['dictionaries'] ?? null)) {
             if (!is_array($dictionaries)) {
                 throw $this->buildException('The "dictionaries" key must contain an array', $file);
             }
@@ -343,7 +340,7 @@ abstract class AbstractFileLoader implements LoaderInterface
                 }
             }
         }
-        if ($jobs = $content['jobs'] ?? null) {
+        if (null !== ($jobs = $content['jobs'] ?? null)) {
             if (!is_array($jobs)) {
                 throw $this->buildException('The "jobs" key must contain an array', $file);
             }

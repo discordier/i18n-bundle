@@ -100,7 +100,7 @@ final class DebugDictionariesCommand extends Command
         $list = [];
         foreach ($this->providers->ids() as $providerName) {
             $dictionaries = [];
-            if ($filterProvider && ($filterProvider !== $providerName)) {
+            if ('' !== ($filterProvider ?? '') && ($filterProvider !== $providerName)) {
                 continue;
             }
             $provider = $this->providers->get($providerName);
